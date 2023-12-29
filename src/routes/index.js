@@ -1,17 +1,14 @@
 const USER = require("./user");
-const PRODUCT = require("./product");
-const REFRESH = require("./refreshToken");
-const ORDER = require("./order");
-
+const TRANSACTION = require("./transaction");
+const Gathering = require("./gathering");
+const Note = require("./note");
+const refreshToken = require("./refreshToken");
 function route(app) {
-    //     // route (truyền vào 2 đối số 1 Path là tuyến đường 2 là function handler)
-    // app.get('/', (req, res) => {
-    //     res.render('home');
-    //   }); // req(request chứa những thông tin gửi lên server) res(response là những phản hồi trả về mình có thể dùng nó để thực hiện các thao tác)
     app.use("/users", USER);
-    app.use("/product", PRODUCT);
-    app.use("/refresh", REFRESH);
-    app.use("/order", ORDER);
+    app.use("/transaction", TRANSACTION);
+    app.use("/gathering", Gathering);
+    app.use("/note", Note);
+    app.use("/refresh", refreshToken);
 }
 
 module.exports = route;

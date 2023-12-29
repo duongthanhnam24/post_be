@@ -1,53 +1,43 @@
-const bcrypt = require("bcrypt");
-var jwt = require("jsonwebtoken");
-
-const user = require("../models/userDataBase");
+const User = require("../models/userDataBase");
 const { accesToken, refreshToken } = require("../../config/service/accesToken");
-const escapeStringRegexp = require("escape-string-regexp-node");
-
+const bcrypt = require("bcrypt");
 const createUser = async (req, res) => {
     try {
-        const { name, msv, password, checkpassword, phone } = req.body;
+        const { name, userName, password, role } = req.body;
 
-        // const allUser = await User.findOne({ email: req.body.email });
-        if (!name || !msv || !password || !checkpassword || !phone) {
-            return res.status(400).json({ message: "Error, Something wrong" });
+        if (!name || !userName || !password || !role) {
+            return res.status(400).json({ message: "Bạn quên điền gì đó" });
         }
-        if (password !== checkpassword) {
-            return res.status(400).json({ message: "Your password is not correct" });
+        const checkUserName = await User.findOne({ userName: userName });
+        if (checkUserName) {
+            return res.status(400).json({ message: "Tên tài khoản đã tồn tại" });
         }
-        // if (allUser) {
-        //     return res.status(400).json("email error");
-        // }
-
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(password, salt);
-        const createUser = await new user({
+        const createUser = await new User({
             name,
-            msv,
+            userName,
+            role,
             password: hash,
-            checkpassword: hash,
-            phoneNumber: phone,
         });
-        const user1 = await createUser.save();
-        return res.status(200).json(user1);
+        const user = await createUser.save();
+        return res.status(200).json({ user, message: "Tạo tài khoản thành công" });
     } catch (e) {
         return res.status(400).json({ message: e });
     }
 };
 
 const SignIn = async (req, res) => {
-    console.log(req.body);
     try {
-        const getUser = await user.findOne({ msv: req.body.msv });
+        const getUser = await User.findOne({ userName: req.body.userName });
 
         if (!getUser) {
-            return res.status(400).json({ message: "msv not found" });
+            return res.status(400).json({ message: "user name not found" });
         }
 
         const checkPassword = await bcrypt.compareSync(req.body.password, getUser.password);
         if (!checkPassword) {
-            return res.status(400).json({ message: req.body.password });
+            return res.status(400).json({ message: "Sai Mật khẩu" });
         }
 
         if (getUser && checkPassword) {
@@ -68,81 +58,26 @@ const SignIn = async (req, res) => {
     }
 };
 
-const UpdateUser = async (req, res) => {
+const GetAllUser = async (req, res) => {
     try {
-        const getUser = await user.updateOne({ _id: req.params.id }, req.body);
-        return res.status(200).json({ message: "succesfull", getUser });
-    } catch (error) {
-        return res.status(400).json({ message: error });
-    }
-};
-
-const getAllUser = async (req, res) => {
-    try {
-        const searchQuery = req.query.search;
-        if (searchQuery) {
-            console.log(1);
-            const $regex = escapeStringRegexp(searchQuery);
-            const allUserSearch = await user.find({
-                $or: [
-                    { name: { $regex, $options: "i" } },
-                    { msv: { $regex, $options: "i" } },
-                    { phoneNumber: { $regex, $options: "i" } },
-                    { class: { $regex, $options: "i" } },
-                ],
-            });
-            console.log(allUserSearch);
-            return res.status(200).json(allUserSearch);
-        }
-        const allUser = await user.find();
+        const allUser = await User.find();
         return res.status(200).json(allUser);
     } catch (error) {
-        return res.status(400).json({ message: error });
+        return res.status(400).json({ message: "Không tìm thấy tài khoản nào" });
     }
 };
-
 const getUser = async (req, res) => {
     try {
-        const human = await user.findOne({ _id: req.params.id });
+        const human = await User.findOne({ _id: req.params.id });
         console.log(human);
         return res.status(200).json(human);
     } catch (error) {
         return res.status(400).json({ message: error });
     }
 };
-
-const moveUserToTrash = async (req, res) => {
-    try {
-        const user = await user.delete({ _id: req.params.id });
-        const resultUser = res.status(200).json({ message: "successful" });
-    } catch (error) {
-        return res.status(400).json({ message: error });
-    }
-};
-
-const punishUser = async (req, res) => {
-    const { id, key } = req.params;
-
-    try {
-        const updatedUser = await user.findOneAndUpdate({ _id: id }, { punish: key });
-
-        if (updatedUser) {
-            return res.status(200).json({ message: " successfully." });
-        } else {
-            return res.status(404).json({ message: "User not found." });
-        }
-    } catch (error) {
-        // Handle the error appropriately, e.g., send an error response
-
-        res.status(500).json({ message: "Internal server error." });
-    }
-};
 module.exports = {
     createUser,
     SignIn,
-    UpdateUser,
-    getAllUser,
+    GetAllUser,
     getUser,
-    moveUserToTrash,
-    punishUser,
 };

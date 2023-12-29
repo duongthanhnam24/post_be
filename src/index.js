@@ -4,6 +4,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const methodOverride = require("method-override");
+
 const app = express();
 const port = 4000;
 const route = require("./routes/index.js");
@@ -38,5 +39,3 @@ route(app);
 app.listen(port, () => {
     console.log(`server on http://localhost:${port}`);
 });
-
-//Windows Shift + Alt + F.

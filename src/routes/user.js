@@ -1,13 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const UserController = require("../app/controlers/UserController");
-const { authMiddleWare, authUserMiddleWare } = require("../app/Middleware/authMiddleware");
-router.delete("/move/trash/:id", authMiddleWare, UserController.moveUserToTrash); // xóa vào thùng rác
-router.patch("/update/:id", authUserMiddleWare, UserController.UpdateUser); // cập nhật thông tin người dùng
-router.patch("/punish/:id/:key", UserController.punishUser);
-router.post("/signup", UserController.createUser); // đăng ký
-router.post("/login", UserController.SignIn); //đăng nhập
-router.get("/all-user", UserController.getAllUser); // lấy tất cả tt người dùng
-router.get("/profile/:id", authUserMiddleWare, UserController.getUser); // lấy ra 1 user
-
+const UserController = require("../app/controlers/userController");
+const { authUserMiddleWare } = require("../app/Middleware/authMiddleware");
+router.post("/sign-up", UserController.createUser);
+router.post("/login", UserController.SignIn);
+router.get("/all", UserController.GetAllUser);
+router.get("/profile/:id", authUserMiddleWare, UserController.getUser);
 module.exports = router;

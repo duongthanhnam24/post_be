@@ -4,19 +4,20 @@ const slug = require("mongoose-slug-updater");
 
 const user = new Schema(
     {
-        name: { type: String, required: true },
-        msv: { type: String, required: true, unique: true },
-        password: { type: String, required: true },
-        checkpassword: {
+        name: { type: String, require: true },
+        userName: { type: String, require: true },
+        password: { type: String, require: true },
+        role: {
             type: String,
-            required: true,
+            enum: [
+                "admin",
+                "leaderTransactionPoint",
+                "tellersTransactionPoint",
+                "leaderGatheringPoint",
+                "tellersGatheringPoint",
+            ],
+            require: true,
         },
-        isAdmin: { type: Boolean, default: false, required: true },
-        phoneNumber: { type: String, required: true },
-        punish: { type: Boolean, default: false, require: true },
-        class: { type: String },
-        // access_token: { type: String, required: true },
-        // refresh_token: { type: String, required: true },
     },
     {
         timestamps: true,
